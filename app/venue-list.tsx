@@ -3,51 +3,46 @@
 import Link from "next/link";
 import type { Venue } from "@/lib/venue-engine";
 import {
-  formatClaimValue,
   formatDistance,
+  listChips,
   scoreTier,
   workFitLabel,
-  workFitPieces,
 } from "@/lib/work-fit";
 
 export function VenueList({ venues }: { venues: Venue[] }) {
-  if (venues.length === 0) {
-    return <p className="muted">No spots in this view.</p>;
-  }
-
   return (
     <ol className="venue-list">
-      {venues.map((venue) => (
-        <li key={venue.id}>
-          <Link href={`/spots/${encodeURIComponent(venue.id)}`} className="venue-row">
-            <span
-              className={`work-fit-badge work-fit-badge--${scoreTier(venue.workScore)}`}
-              aria-label={workFitLabel(venue.workScore)}
-            >
-              <strong>{venue.workScore}</strong>
-              <span>Work Fit</span>
-            </span>
-            <span className="venue-row-body">
-              <span className="venue-row-name">{venue.name}</span>
-              <span className="muted">
-                {venue.neighborhood}
-                {formatDistance(venue.distance_m)
-                  ? ` · ${formatDistance(venue.distance_m)}`
-                  : ""}
+      {venues.map((venue) => {
+        const distance = formatDistance(venue.distance_m);
+        const chips = listChips(venue);
+        return (
+          <li key={venue.id}>
+            <Link href={`/spots/${encodeURIComponent(venue.id)}`} className="venue-row">
+              <span
+                className={`work-fit-badge work-fit-badge--${scoreTier(venue.workScore)}`}
+                aria-label={workFitLabel(venue.workScore)}
+              >
+                <strong>{venue.workScore}</strong>
+                <span>Work Fit</span>
               </span>
-              <span className="venue-row-signals">
-                {workFitPieces(venue)
-                  .map((piece) =>
-                    piece.claim
-                      ? `${piece.title} ${formatClaimValue(piece.claim.value)}`
-                      : `${piece.title} unobserved`,
-                  )
-                  .join(" · ")}
+              <span className="venue-row-body">
+                <span className="venue-row-name">{venue.name}</span>
+                <span className="muted venue-row-meta">
+                  {venue.neighborhood}
+                  {distance ? ` · ${distance}` : ""}
+                </span>
+                <span className="chip-row">
+                  {chips.map((chip) => (
+                    <span key={chip} className="factor-chip">
+                      {chip}
+                    </span>
+                  ))}
+                </span>
               </span>
-            </span>
-          </Link>
-        </li>
-      ))}
+            </Link>
+          </li>
+        );
+      })}
     </ol>
   );
 }
