@@ -80,6 +80,18 @@ export type NearbyQuery = {
   sort?: "work_score" | "distance";
 };
 
+export type VenueLoadKind = "failed" | "not_found";
+
+export class VenueLoadError extends Error {
+  readonly kind: VenueLoadKind;
+
+  constructor(kind: VenueLoadKind) {
+    super(kind);
+    this.name = "VenueLoadError";
+    this.kind = kind;
+  }
+}
+
 export function nearbyVenuesUrl(query: NearbyQuery): string {
   const url = new URL("/v1/venues", VENUE_ENGINE_ORIGIN);
   url.searchParams.set("lat", String(query.lat));
@@ -100,15 +112,18 @@ export async function fetchNearbyVenues(
   const url = nearbyVenuesUrl(query);
   const response = await fetch(url, { cache: "no-store" });
   if (!response.ok) {
-    throw new Error(`venue engine ${response.status}`);
+    throw new VenueLoadError("failed");
   }
   return (await response.json()) as VenueSearchResult;
 }
 
 export async function fetchVenueDetail(id: string): Promise<VenueDetailResult> {
   const response = await fetch(venueDetailUrl(id), { cache: "no-store" });
+  if (response.status === 404) {
+    throw new VenueLoadError("not_found");
+  }
   if (!response.ok) {
-    throw new Error(`venue engine ${response.status}`);
+    throw new VenueLoadError("failed");
   }
   return (await response.json()) as VenueDetailResult;
 }
