@@ -36,17 +36,31 @@ function clusterIcon(count: number) {
   });
 }
 
-function waitForPaneSize(map: L.Map): Promise<L.Point> {
+function waitForStablePaneSize(map: L.Map): Promise<L.Point> {
   return new Promise((resolve) => {
+    let last = { x: 0, y: 0 };
+    let stable = 0;
     let frames = 0;
     const tick = () => {
       map.invalidateSize({ animate: false });
       const size = map.getSize();
-      if ((size.x >= 40 && size.y >= 40) || frames > 90) {
+      const ready = size.x >= 80 && size.y >= 80;
+      const same = size.x === last.x && size.y === last.y;
+      if (ready && same) {
+        stable += 1;
+        if (stable >= 4) {
+          resolve(size);
+          return;
+        }
+      } else {
+        stable = 0;
+      }
+      last = { x: size.x, y: size.y };
+      frames += 1;
+      if (frames > 120) {
         resolve(size);
         return;
       }
-      frames += 1;
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
@@ -91,44 +105,36 @@ function clusterVenues(map: L.Map, venues: Venue[]): Venue[][] {
 
 function applyCamera(map: L.Map, venues: Venue[], center: { lat: number; lng: number }) {
   map.invalidateSize({ animate: false });
-  if (venues.length === 0) {
-    map.setView([center.lat, center.lng], DEFAULT_ZOOM, { animate: false });
-    return;
-  }
+  // Always plant the camera on the requested center at neighborhood zoom so a
+  // too-wide first layout cannot leave Union Square off the right edge (#7).
+  map.setView([center.lat, center.lng], DEFAULT_ZOOM, { animate: false });
+  if (venues.length === 0) return;
+
   const bounds = L.latLngBounds(venues.map((venue) => [venue.lat, venue.lng]));
   const extra = sheetPaddingPx(map);
-  map.fitBounds(bounds, {
-    paddingTopLeft: [28, 28],
-    paddingBottomRight: [28, 28 + extra],
-    maxZoom: MAX_FIT_ZOOM,
-    animate: false,
-  });
+  const padding = L.point(28, 28);
+  const zoomToFit = map.getBoundsZoom(bounds, false, padding);
+  if (zoomToFit >= DEFAULT_ZOOM) {
+    map.fitBounds(bounds, {
+      paddingTopLeft: [28, 28],
+      paddingBottomRight: [28, 28 + extra],
+      maxZoom: MAX_FIT_ZOOM,
+      animate: false,
+    });
+  }
 }
 
 function FitPinsAndClusters({ venues, center, onSelect }: VenueMapProps) {
   const map = useMap();
   const onSelectRef = useRef(onSelect);
   const layerRef = useRef<L.LayerGroup | null>(null);
+  const fittedSize = useRef<{ x: number; y: number } | null>(null);
   const lat = center.lat;
   const lng = center.lng;
 
   useEffect(() => {
     onSelectRef.current = onSelect;
   }, [onSelect]);
-
-  useEffect(() => {
-    const container = map.getContainer();
-    const observer = new ResizeObserver(() => {
-      map.invalidateSize({ animate: false });
-    });
-    observer.observe(container);
-    const onWindowResize = () => map.invalidateSize({ animate: false });
-    window.addEventListener("resize", onWindowResize);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", onWindowResize);
-    };
-  }, [map]);
 
   useEffect(() => {
     let cancelled = false;
@@ -168,18 +174,41 @@ function FitPinsAndClusters({ venues, center, onSelect }: VenueMapProps) {
       }
     }
 
-    async function setup() {
-      await waitForPaneSize(map);
+    function fitAndDraw() {
       if (cancelled) return;
       applyCamera(map, venues, { lat, lng });
+      const size = map.getSize();
+      fittedSize.current = { x: size.x, y: size.y };
       draw();
     }
+
+    async function setup() {
+      await waitForStablePaneSize(map);
+      if (cancelled) return;
+      fitAndDraw();
+    }
+
+    const container = map.getContainer();
+    const observer = new ResizeObserver(() => {
+      map.invalidateSize({ animate: false });
+      const size = map.getSize();
+      const prev = fittedSize.current;
+      if (!prev) return;
+      if (Math.abs(prev.x - size.x) > 48 || Math.abs(prev.y - size.y) > 48) {
+        fitAndDraw();
+      }
+    });
+    observer.observe(container);
+    const onWindowResize = () => map.invalidateSize({ animate: false });
+    window.addEventListener("resize", onWindowResize);
 
     void setup();
     map.on("zoomend", draw);
 
     return () => {
       cancelled = true;
+      observer.disconnect();
+      window.removeEventListener("resize", onWindowResize);
       map.off("zoomend", draw);
       if (layerRef.current) {
         map.removeLayer(layerRef.current);

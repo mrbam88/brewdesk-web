@@ -10,6 +10,8 @@ const INK = "#241c16";
 const FOREST = "#2c5f4a";
 const GOOD = "#4a7c59";
 const MIXED = "#b0893e";
+const STREET = "#d7ccba";
+const PARK = "#c5d7c4";
 
 function Pin({
   left,
@@ -28,17 +30,17 @@ function Pin({
         position: "absolute",
         left,
         top,
-        width: 72,
-        height: 72,
-        borderRadius: 36,
-        background: color,
+        width: 78,
+        height: 78,
+        borderRadius: 39,
+        backgroundColor: color,
         color: CREAM,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        fontSize: 28,
+        fontSize: 30,
         fontWeight: 700,
-        border: "3px solid #fffdf8",
+        border: "4px solid #fffdf8",
       }}
     >
       {score}
@@ -54,94 +56,111 @@ export default function OpengraphImage() {
           width: "100%",
           height: "100%",
           display: "flex",
-          background: CREAM,
-          color: INK,
           position: "relative",
+          backgroundColor: CREAM,
+          color: INK,
         }}
       >
         <div
           style={{
             position: "absolute",
-            inset: 40,
+            top: 36,
+            left: 36,
+            width: 1128,
+            height: 430,
             borderRadius: 28,
-            background: "#e7dfd0",
+            backgroundColor: "#e8dfd0",
             display: "flex",
-            overflow: "hidden",
           }}
         >
           <div
             style={{
               position: "absolute",
-              left: 80,
+              left: 90,
               top: 0,
-              bottom: 0,
-              width: 8,
-              background: "#d9cfc0",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              left: 280,
-              top: 0,
-              bottom: 0,
-              width: 6,
-              background: "#d9cfc0",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              left: 620,
-              top: 0,
-              bottom: 0,
               width: 10,
-              background: "#d3c8b6",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              top: 140,
-              height: 8,
-              background: "#d9cfc0",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              top: 310,
-              height: 6,
-              background: "#d3c8b6",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              width: 220,
-              height: 90,
-              left: 360,
-              top: 200,
-              borderRadius: 16,
-              background: "#cddfcf",
+              height: 430,
+              backgroundColor: STREET,
               display: "flex",
             }}
           />
-          <Pin left={200} top={120} score={72} color={GOOD} />
-          <Pin left={430} top={250} score={69} color={GOOD} />
-          <Pin left={720} top={90} score={81} color={FOREST} />
-          <Pin left={860} top={320} score={58} color={MIXED} />
+          <div
+            style={{
+              position: "absolute",
+              left: 310,
+              top: 0,
+              width: 8,
+              height: 430,
+              backgroundColor: STREET,
+              display: "flex",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              left: 640,
+              top: 0,
+              width: 12,
+              height: 430,
+              backgroundColor: STREET,
+              display: "flex",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              left: 920,
+              top: 0,
+              width: 8,
+              height: 430,
+              backgroundColor: STREET,
+              display: "flex",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 120,
+              width: 1128,
+              height: 10,
+              backgroundColor: STREET,
+              display: "flex",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 270,
+              width: 1128,
+              height: 8,
+              backgroundColor: STREET,
+              display: "flex",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              left: 380,
+              top: 160,
+              width: 240,
+              height: 96,
+              borderRadius: 18,
+              backgroundColor: PARK,
+              display: "flex",
+            }}
+          />
+          <Pin left={180} top={70} score={72} color={GOOD} />
+          <Pin left={470} top={210} score={69} color={GOOD} />
+          <Pin left={760} top={50} score={81} color={FOREST} />
+          <Pin left={980} top={280} score={58} color={MIXED} />
         </div>
         <div
           style={{
             position: "absolute",
-            left: 64,
-            right: 64,
-            bottom: 48,
+            left: 56,
+            bottom: 28,
             display: "flex",
             flexDirection: "column",
           }}
@@ -149,21 +168,14 @@ export default function OpengraphImage() {
           <div
             style={{
               display: "flex",
-              fontSize: 56,
+              fontSize: 52,
               fontWeight: 700,
               color: FOREST,
             }}
           >
             BrewDesk
           </div>
-          <div
-            style={{
-              display: "flex",
-              fontSize: 28,
-              color: INK,
-              marginTop: 8,
-            }}
-          >
+          <div style={{ display: "flex", fontSize: 26, color: INK, marginTop: 4 }}>
             find where work actually works
           </div>
         </div>
