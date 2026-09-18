@@ -42,6 +42,18 @@ npm run build   # production compile
 Optional: copy `.env.example` to `.env.local` to point at another engine
 origin. The default is the live API. No secrets are required.
 
+### Map provider
+
+With `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` set, the map renders with Google Maps
+(`app/google-venue-map.tsx`, Advanced Markers; `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID`
+optional, defaults to `DEMO_MAP_ID`). Without it, the Leaflet +
+OpenStreetMap fallback (`app/venue-map.tsx`) renders unchanged. A rejected
+key (`gm_authFailure`) or a Google render error also swaps in that fallback,
+so a bad key can never take the page down. Both share
+the same framing and clustering rules. The key is a referrer-restricted
+browser key whose quota is capped under the free tier; search stays on
+Nominatim either way.
+
 ## Engine contract
 
 Do not invent a new API. Nearby listing is the public, unauthenticated route

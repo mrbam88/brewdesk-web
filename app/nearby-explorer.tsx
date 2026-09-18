@@ -15,7 +15,13 @@ import { nearbyResultLine } from "@/lib/work-fit";
 import { ProductHeader } from "./product-header";
 import { VenueList } from "./venue-list";
 
-const VenueMap = dynamic(() => import("./venue-map"), {
+// Google Maps when a browser key is configured (#17); Leaflet + OSM otherwise.
+const VenueMap = dynamic(
+  () =>
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+      ? import("./google-venue-map")
+      : import("./venue-map"),
+  {
   ssr: false,
   loading: () => <div className="map-placeholder" aria-hidden="true" />,
 });
